@@ -3,7 +3,7 @@ import { useState } from "react";
 import ListItem from "./listItem";
 
 
-export default function AddItemButton({setWishList}) {
+export default function AddItemButton({setWishList}: any) {
 
     let [isAdding, setIsAdding] = useState(false)
     let [newItemName, setNewItemName] = useState(false)

@@ -29,7 +29,7 @@ export default function ListItem({id, itemName, isNew = false, setWishList }: Li
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-            setWishList((prev: Array<Object>) => {
+            setWishList((prev: { id: string, name: string }[]) => {
                 if ( isNew ) return [ ...prev, {id: uuidv4(), name: inputValue}]
                 else {
                     let foundItemIdx = prev.findIndex(item => item.id === id)
@@ -37,8 +37,11 @@ export default function ListItem({id, itemName, isNew = false, setWishList }: Li
                         let newList = [...prev]
                         newList[foundItemIdx].name = inputValue
                         return newList
+                    } else {
+                        return prev;
                     }
                 }
+                
             })
             setInputValue("")
         }
