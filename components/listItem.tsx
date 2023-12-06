@@ -1,13 +1,16 @@
 'use client'
-import { randomUUID } from 'crypto';
 import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 type ListItemProps = {
+    id: any;
     itemName: string;
     isNew: boolean;
+    setWishList: React.Dispatch<React.SetStateAction<Array<{id: string, name: string}>>>;
 };
 
-export default function ListItem({ itemName, isNew = false }: ListItemProps) {
+export default function ListItem({id, itemName, isNew = false, setWishList }: ListItemProps) {
+
     const [isEditable, setIsEditable] = useState(isNew);
     const [inputValue, setInputValue] = useState(itemName);
 
@@ -26,9 +29,22 @@ export default function ListItem({ itemName, isNew = false }: ListItemProps) {
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-            setWishList(prev => {
-                if ( isNew ) return [ ...prev, {id: randomUUID, name: inputValue}]
+            setWishList((prev: Array<Object>) => {
+                if ( isNew ) return [ ...prev, {id: uuidv4(), name: inputValue}]
+                else {
+                    let foundItemIdx = prev.findIndex(item => item.id === id)
+                    if (foundItemIdx !== -1) {
+                        let newList = [...prev]
+                        newList[foundItemIdx].name = inputValue
+                        return newList
+                    }
+                }
             })
+            setInputValue("")
+        }
+
+        if (event.key === 'Escape') {
+            event.currentTarget.blur()
         }
     };
 
@@ -45,7 +61,7 @@ export default function ListItem({ itemName, isNew = false }: ListItemProps) {
                     onKeyDown={handleKeyPress}
                     autoFocus
                 />
-                <p className="">Press `enter` to <strong>Save</strong></p>
+                <p className="">Press <code>[enter]</code> to <strong>Save</strong></p>
             </div> 
             : 
             <h2 className="" onClick={handleClick}>{itemName}</h2>

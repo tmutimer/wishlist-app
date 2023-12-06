@@ -3,7 +3,7 @@ import { useState } from "react";
 import ListItem from "./listItem";
 
 
-export default function AddItemButton() {
+export default function AddItemButton({setWishList}) {
 
     let [isAdding, setIsAdding] = useState(false)
     let [newItemName, setNewItemName] = useState(false)
@@ -16,13 +16,10 @@ export default function AddItemButton() {
         setIsAdding(false)
     }
 
-    function onSave() {
-    }
-
     return (
         <div onBlur={handleBlur}>
             
-            {isAdding ? <ListItem itemName="" isNew={true} /> : <button onClick={handleClick}>Add an item...</button>}
+            {isAdding ? <ListItem id="" itemName="" isNew={true} setWishList={setWishList}/> : <button onClick={handleClick}>Add an item...</button>}
         </div>
     )
 }
