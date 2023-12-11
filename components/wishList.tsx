@@ -9,11 +9,14 @@ const getMyWishList  = () => {
         {
             id: uuidv4(), 
             name: "Harry Potter and the Hard-coded List", 
-            note: "It's good"}, 
+            note: "It's good",
+            price: 9.99
+        }, 
         {
             id: uuidv4(), 
             name: "Harry Potter and the Half-blood List", 
-            note: "Get on Amazon"
+            note: "Get on Amazon",
+            price: 11
         }
     ]
 }
@@ -38,7 +41,7 @@ export default function WishList() {
      */
     const addItem = (newItemTitle: string) => {
         if(newItemTitle && newItemTitle.trim()) {
-            setWishList((prev) => [...prev, {id: uuidv4(), name: newItemTitle, note: ""}])
+            setWishList((prev) => [...prev, {id: uuidv4(), name: newItemTitle, note: "", price: NaN}])
         }
 
         setIsAdding(false)
@@ -51,7 +54,7 @@ export default function WishList() {
     return (
         <main className="flex min-h-screen flex-col items-center gap-4 p-24">
             {wishList.map((item) => (
-                <ListItem key={item.id} id={item.id} name={item.name} note={item.note} updateItem={getUpdateItemFunction(item.id)} />
+                <ListItem key={item.id} id={item.id} name={item.name} note={item.note} price={item.price} updateItem={getUpdateItemFunction(item.id)} />
             ))}
             { !isAdding ? <AddItemButton onPress={triggerAdd} /> : <NewItemInput submitAction={addItem} /> }
         </main>

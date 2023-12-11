@@ -7,15 +7,17 @@ export interface ListItemProps {
     id: string;
     name: string;
     note: string;
+    price: number;
     updateItem: Function;
 };
 
-export default function ListItem({id, name, note, updateItem = () => {console.log("default updateItem used");
+export default function ListItem({id, name, note, price, updateItem = () => {console.log("default updateItem used");
 } }: ListItemProps) {
 
     const [isEditable, setIsEditable] = useState(false);
     const [localName, setLocalName] = useState(name);
-    const [localNote, setLocalNote] = useState(note)
+    const [localNote, setLocalNote] = useState(note);
+    const [localPrice, setLocalPrice] = useState(price);
 
     const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node)) { //handle blur bubble from child
@@ -35,9 +37,14 @@ export default function ListItem({id, name, note, updateItem = () => {console.lo
         setLocalNote(event.target.value);
     };
 
+    const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setLocalPrice(parseFloat(event.target.value));
+    };
+
+
     const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-            updateItem({id, name, note})
+            updateItem({id, name, note, price})
                 
             event.currentTarget.blur()
             // setLocalName(name)
@@ -72,12 +79,21 @@ export default function ListItem({id, name, note, updateItem = () => {console.lo
                     onKeyDown={handleKeyPress}
                     placeholder='Add a note...'
                 />
+                <input 
+                    type="number" 
+                    className="block" 
+                    value={localPrice} 
+                    onChange={handlePriceChange} 
+                    onKeyDown={handleKeyPress}
+                    placeholder='Add a note...'
+                />
                 <small className="block">Press <code>[enter]</code> to <strong>Save</strong></small>
             </form> 
             :
             <div>
-                <h2 className="" onClick={handleClick}>{name}</h2>
-                <small className="block" onClick={handleClick}>{note}</small>
+                <h2 className="" onClick={handleClick}>{localName}</h2>
+                <small className="block" onClick={handleClick}>{localNote}</small>
+                {localPrice && <p>£{localPrice}</p>}
             </div> 
             
             }
