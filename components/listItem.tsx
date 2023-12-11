@@ -1,73 +1,85 @@
 'use client'
+import { UUID } from 'crypto';
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-type ListItemProps = {
-    id: any;
-    itemName: string;
-    isNew: boolean;
-    setWishList: React.Dispatch<React.SetStateAction<Array<{id: string, name: string}>>>;
+export interface ListItemProps {
+    id: string;
+    name: string;
+    note: string;
+    updateItem: Function;
 };
 
-export default function ListItem({id, itemName, isNew = false, setWishList }: ListItemProps) {
+export default function ListItem({id, name, note, updateItem = () => {console.log("default updateItem used");
+} }: ListItemProps) {
 
-    const [isEditable, setIsEditable] = useState(isNew);
-    const [inputValue, setInputValue] = useState(itemName);
+    const [isEditable, setIsEditable] = useState(false);
+    const [localName, setLocalName] = useState(name);
+    const [localNote, setLocalNote] = useState(note)
 
-    const handleBlur = () => {
-        setIsEditable(false);
-        // Here you can handle the update of the item
+    const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node)) { //handle blur bubble from child
+            setIsEditable(false);
+        }
     };
 
     const handleClick = () => {
         setIsEditable(true);
     };
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(event.target.value);
+    const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setLocalName(event.target.value);
+    };
+
+    const handleDescChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setLocalNote(event.target.value);
     };
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-            setWishList((prev: { id: string, name: string }[]) => {
-                if ( isNew ) return [ ...prev, {id: uuidv4(), name: inputValue}]
-                else {
-                    let foundItemIdx = prev.findIndex(item => item.id === id)
-                    if (foundItemIdx !== -1) {
-                        let newList = [...prev]
-                        newList[foundItemIdx].name = inputValue
-                        return newList
-                    } else {
-                        return prev;
-                    }
-                }
+            updateItem({id, name, note})
                 
-            })
-            setInputValue("")
+            event.currentTarget.blur()
+            // setLocalName(name)
+            // setLocalNote(note)
         }
 
         if (event.key === 'Escape') {
             event.currentTarget.blur()
+            // setLocalName(name)
+            // setLocalNote(note)
         }
     };
 
     return (
-        <div className="bg-white rounded min-h-[100px] min-w-[380px] p-5">
+        <div className="bg-white rounded min-h-[100px] min-w-[380px] p-5" onBlur={handleBlur} >
             {isEditable ?
-            <div>
+            <form>
                 <input 
                     type="text" 
-                    className="" 
-                    value={inputValue} 
-                    onChange={handleChange} 
-                    onBlur={handleBlur} 
+                    className="block" 
+                    value={localName} 
+                    onChange={handleTitleChange} 
                     onKeyDown={handleKeyPress}
+                    placeholder='What are you wishing for?'
                     autoFocus
                 />
-                <p className="">Press <code>[enter]</code> to <strong>Save</strong></p>
+                <input 
+                    type="text" 
+                    className="block" 
+                    value={localNote} 
+                    onChange={handleDescChange} 
+                    onKeyDown={handleKeyPress}
+                    placeholder='Add a note...'
+                />
+                <small className="block">Press <code>[enter]</code> to <strong>Save</strong></small>
+            </form> 
+            :
+            <div>
+                <h2 className="" onClick={handleClick}>{name}</h2>
+                <small className="block" onClick={handleClick}>{note}</small>
             </div> 
-            : 
-            <h2 className="" onClick={handleClick}>{itemName}</h2>
+            
             }
         </div>
     );

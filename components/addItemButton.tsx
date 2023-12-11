@@ -3,23 +3,15 @@ import { useState } from "react";
 import ListItem from "./listItem";
 
 
-export default function AddItemButton({setWishList}: any) {
+export default function AddItemButton({onPress}: {onPress: Function}) {
 
-    let [isAdding, setIsAdding] = useState(false)
     let [newItemName, setNewItemName] = useState(false)
 
-    function handleClick() {
-        setIsAdding(true)
-    }
-
-    function handleBlur() {
-        setIsAdding(false)
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        onPress()
     }
 
     return (
-        <div onBlur={handleBlur}>
-            
-            {isAdding ? <ListItem id="" itemName="" isNew={true} setWishList={setWishList}/> : <button onClick={handleClick}>Add an item...</button>}
-        </div>
+        <button onClick={handleClick}>Add an item...</button>
     )
 }
