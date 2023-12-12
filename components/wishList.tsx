@@ -1,8 +1,9 @@
 import ListItem, {ListItemProps} from "@/components/listItem"
 import AddItemButton from "@/components/addItemButton";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import NewItemInput from "./newItemInput";
+import { useSession } from "next-auth/react";
 
 const getMyWishList  = () => {
     return [
@@ -22,9 +23,18 @@ const getMyWishList  = () => {
 }
 
 export default function WishList() {
-    //load wishlist and add additional front end props
-    const [wishList, setWishList] = useState(getMyWishList()) 
+    const {data: session} = useSession();
+    const [wishList, setWishList] = useState(getMyWishList())
     const [isAdding, setIsAdding] = useState(false)
+
+    useEffect(() => {
+        if (session?.user?.id) {
+          fetch(`/api/wishlists?userID=${session.user.id}`)
+            .then(response => response.json())
+            .then(data => setWishList(data));
+        }
+      }, [session]);
+
 
     /**
      * Updates an item in the wish list.
