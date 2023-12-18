@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 import { IUser } from './User';
 
 export interface IListItem extends Document {
@@ -6,9 +6,6 @@ export interface IListItem extends Document {
     name: string;
     note: string;
     price: number;
-    url?: string;
-    reserved: boolean;
-    reservedBy?: string;
 }
 
 export interface IWishlist extends Document {
@@ -22,9 +19,6 @@ const ListItemSchema: Schema = new Schema({
     name: { type: String, required: true },
     note: { type: String, required: true },
     price: { type: Number, required: true },
-    url: { type: String },
-    reserved: { type: Boolean, required: true, default: false },
-    reservedBy: { type: String }
 });
 
 const WishlistSchema: Schema = new Schema({
@@ -33,4 +27,11 @@ const WishlistSchema: Schema = new Schema({
     listItems: [ListItemSchema]
 });
 
-export default mongoose.model<IWishlist>('Wishlist', WishlistSchema);
+let Wishlist: Model<IWishlist>;
+try {
+  Wishlist = mongoose.model('Wishlist') as Model<IWishlist>
+} catch (error) {
+  Wishlist = mongoose.model<IWishlist>('Wishlist', WishlistSchema);
+}
+
+export default Wishlist;

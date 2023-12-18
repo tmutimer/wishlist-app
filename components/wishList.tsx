@@ -1,57 +1,65 @@
 import ListItem, {ListItemProps} from "@/components/listItem"
 import AddItemButton from "@/components/addItemButton";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import NewItemInput from "./newItemInput";
 import { useSession } from "next-auth/react";
-
-const getMyWishList  = () => {
-    return [
-        {
-            id: uuidv4(), 
-            name: "Harry Potter and the Hard-coded List", 
-            note: "It's good",
-            price: 9.99
-        }, 
-        {
-            id: uuidv4(), 
-            name: "Harry Potter and the Half-blood List", 
-            note: "Get on Amazon",
-            price: 11
-        }
-    ]
-}
+import { IListItem, IWishlist } from "@/models/Wishlist";
 
 export default function WishList() {
     const {data: session} = useSession();
-    const [wishList, setWishList] = useState(getMyWishList())
+    const [wishListItems, setWishListItems] = useState<ListItemProps[]>([]);
     const [isAdding, setIsAdding] = useState(false)
 
-    useEffect(() => {
-        if (session?.user?.id) {
-          fetch(`/api/wishlists?userID=${session.user.id}`)
-            .then(response => response.json())
-            .then(data => setWishList(data));
+    // useCallback is used to memoize the function so that it is not recreated on every render
+    const getUpdateItemFunctionCb = useCallback(getUpdateItemFunction, [wishListItems])
+    
+    function getUpdateItemFunction(id: string) { 
+        return (updatedItem: ListItemProps) => {
+            setWishListItems(wishListItems.map(item => item.id !== id ? item : {...updatedItem}));
         }
-      }, [session]);
-
-
-    /**
-     * Updates an item in the wish list.
-     * @param index - The index of the item to update.
-     * @param updatedItem - The updated item.
-     */
-    const getUpdateItemFunction = (id: string) => (updatedItem: ListItemProps) => {
-        setWishList(wishList.map(item => item.id !== id ? item : {...updatedItem}));
     }
 
-    /**
-     * Adds a new item to the wishlist.
-     * @param {string} newItemTitle - The title of the new item.
-     */
-    const addItem = (newItemTitle: string) => {
+    useEffect(() => {
+
+        if (session?.user?.id) {
+            fetchWishList(session.user.id)
+        }
+        
+        async function fetchWishList(userId: string) {
+            const response = await fetch(`/api/wishlists?userID=${userId}`)
+            const wishListDocument = await response.json()
+            setWishListFromDocument(wishListDocument)
+        }
+        
+        function setWishListFromDocument(wishlistDocument: IWishlist) {
+            const adaptedData = adaptWishListDocumentToReactProps(wishlistDocument);
+            setWishListItems(adaptedData)
+        }
+        
+        function adaptWishListDocumentToReactProps(wishlistDocument: IWishlist): ListItemProps[] {
+            const adaptedData: ListItemProps[] = wishlistDocument.listItems.map((item: IListItem) => ({
+                id: item._id,
+                name: item.name,
+                note: item.note,
+                price: item.price,
+                updateItem: getUpdateItemFunctionCb(item._id)
+                }))
+            return adaptedData
+        }
+
+        
+      }, [getUpdateItemFunctionCb, session]);
+
+    function getListItemDocumentFromProps(item: ListItemProps) {
+        const { id: itemId, name, note, price } = item
+        return { itemId, name, note, price }
+    }
+
+    function addItem (newItemTitle: string) {
         if(newItemTitle && newItemTitle.trim()) {
-            setWishList((prev) => [...prev, {id: uuidv4(), name: newItemTitle, note: "", price: NaN}])
+            const newId = uuidv4()
+            setWishListItems((prev) => [...prev, {id: newId, name: newItemTitle, note: "", price: NaN, updateItem: getUpdateItemFunctionCb(newId)}])
         }
 
         setIsAdding(false)
@@ -63,7 +71,7 @@ export default function WishList() {
 
     return (
         <main className="flex min-h-screen flex-col items-center gap-4 p-24">
-            {wishList.map((item) => (
+            {wishListItems && wishListItems.map((item) => (
                 <ListItem key={item.id} id={item.id} name={item.name} note={item.note} price={item.price} updateItem={getUpdateItemFunction(item.id)} />
             ))}
             { !isAdding ? <AddItemButton onPress={triggerAdd} /> : <NewItemInput submitAction={addItem} /> }
