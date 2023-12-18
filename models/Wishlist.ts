@@ -2,28 +2,30 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 import { IUser } from './User';
 
 export interface IListItem extends Document {
-    itemId: string;
+    itemID: string;
     name: string;
-    note: string;
-    price: number;
+    note?: string;
+    price?: number;
+    reserved: boolean;
+    reservedBy?: string;
 }
 
 export interface IWishlist extends Document {
-    wishlistId: string;
-    userId: IUser['googleId'];
+    wishlistID: string;
+    userID: IUser['googleId'];
     listItems: IListItem[];
 }
 
 const ListItemSchema: Schema = new Schema({
-    itemId: { type: String, required: true },
+    itemID: { type: String, required: true },
     name: { type: String, required: true },
-    note: { type: String, required: true },
-    price: { type: Number, required: true },
+    note: { type: String, required: false },
+    price: { type: Number, required: false },
 });
 
 const WishlistSchema: Schema = new Schema({
-    wishlistId: { type: String, required: true, unique: true },
-    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    wishlistID: { type: String, required: true, unique: true },
+    userID: { type: Schema.Types.ObjectId, ref: 'User' },
     listItems: [ListItemSchema]
 });
 

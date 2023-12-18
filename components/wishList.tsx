@@ -5,6 +5,9 @@ import { v4 as uuidv4 } from 'uuid';
 import NewItemInput from "./newItemInput";
 import { useSession } from "next-auth/react";
 import { IListItem, IWishlist } from "@/models/Wishlist";
+import { WishlistAPIResponse } from "@/app/api/wishlists/[userID]/route";
+import { ListItemAPIResponse } from "@/app/api/wishlists/[userID]/items/route";
+import { redirect } from "next/dist/server/api-utils";
 
 export default function WishList() {
     const {data: session} = useSession();
@@ -21,33 +24,29 @@ export default function WishList() {
     }
 
     useEffect(() => {
-
+        // Get the wishlist if the user is logged
         if (session?.user?.id) {
             fetchWishList(session.user.id)
         }
         
         async function fetchWishList(userId: string) {
-            const response = await fetch(`/api/wishlists?userID=${userId}`)
-            const wishListDocument = await response.json()
-            setWishListFromDocument(wishListDocument)
-        }
-        
-        function setWishListFromDocument(wishlistDocument: IWishlist) {
-            const adaptedData = adaptWishListDocumentToReactProps(wishlistDocument);
-            setWishListItems(adaptedData)
-        }
-        
-        function adaptWishListDocumentToReactProps(wishlistDocument: IWishlist): ListItemProps[] {
-            const adaptedData: ListItemProps[] = wishlistDocument.listItems.map((item: IListItem) => ({
-                id: item._id,
-                name: item.name,
-                note: item.note,
-                price: item.price,
-                updateItem: getUpdateItemFunctionCb(item._id)
-                }))
-            return adaptedData
+            const response = await fetch(`/api/wishlists/${userId}/`)
+            const wishListResponse: WishlistAPIResponse = await response.json()
+            setWishListFromAPIResponse(wishListResponse)
         }
 
+        function setWishListFromAPIResponse(wishlistResponse: WishlistAPIResponse) {
+            const wishListItems: ListItemProps[] = wishlistResponse.listItems.map((item: ListItemAPIResponse) => {
+                return {
+                    id: item.id,
+                    name: item.name,
+                    note: item.note,
+                    price: item.price,
+                    updateItem: getUpdateItemFunctionCb(item.id)
+                }
+            })
+            setWishListItems(wishListItems)
+        }
         
       }, [getUpdateItemFunctionCb, session]);
 

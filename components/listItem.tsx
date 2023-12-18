@@ -6,8 +6,8 @@ import { v4 as uuidv4 } from 'uuid';
 export interface ListItemProps {
     id: string;
     name: string;
-    note: string;
-    price: number;
+    note?: string;
+    price?: number;
     updateItem: Function;
 };
 
