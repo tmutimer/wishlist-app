@@ -17,7 +17,7 @@ export default function ListItem({id, name, note, price, updateItem = () => {con
     const [isEditable, setIsEditable] = useState(false);
     const [localName, setLocalName] = useState(name);
     const [localNote, setLocalNote] = useState(note);
-    const [localPrice, setLocalPrice] = useState(price);
+    const [localPrice, setLocalPrice] = useState(price);    
 
     const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node)) { //handle blur bubble from child
@@ -33,7 +33,7 @@ export default function ListItem({id, name, note, price, updateItem = () => {con
         setLocalName(event.target.value);
     };
 
-    const handleDescChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleNoteChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setLocalNote(event.target.value);
     };
 
@@ -75,7 +75,7 @@ export default function ListItem({id, name, note, price, updateItem = () => {con
                     type="text" 
                     className="block" 
                     value={localNote} 
-                    onChange={handleDescChange} 
+                    onChange={handleNoteChange} 
                     onKeyDown={handleKeyPress}
                     placeholder='Add a note...'
                 />
@@ -85,7 +85,7 @@ export default function ListItem({id, name, note, price, updateItem = () => {con
                     value={localPrice} 
                     onChange={handlePriceChange} 
                     onKeyDown={handleKeyPress}
-                    placeholder='Add a note...'
+                    placeholder='£ What is the price?...'
                 />
                 <small className="block">Press <code>[enter]</code> to <strong>Save</strong></small>
             </form> 
