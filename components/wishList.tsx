@@ -2,7 +2,7 @@
 
 import ListItem, {ListItemProps} from "@/components/listItem"
 import AddItemButton from "@/components/addItemButton";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import NewItemInput from "./newItemInput";
 import { useSession } from "next-auth/react";
@@ -16,6 +16,7 @@ export default function WishList() {
     const [wishListItems, setWishListItems] = useState<ListItemProps[]>([]);
     const [isAdding, setIsAdding] = useState(false)
     const triggerAdd = () => setIsAdding(true)
+    const refreshRequired = useRef(true)
     
     if (!session?.user?.id) {
         console.log("No session found, redirecting to login");
@@ -45,16 +46,20 @@ export default function WishList() {
         // Check if session is available and then call the function
         if (session?.user?.id) {
             fetchWishlist();
+            refreshRequired.current = false
         }
-    }, [session?.user?.id]); // Dependency array
+    }, [session?.user?.id, refreshRequired]); // Dependency array
     
     if (!wishListItems) {
         return <div>Loading...</div>
     }
 
+    console.log("Rendering wishlist with items:", wishListItems);
+    
+
     return (
         <main className="flex min-h-screen flex-col items-center gap-4 p-24">
-            {wishListItems && wishListItems.map((item) => (
+            {wishListItems && wishListItems.map((item) => (            
                 <ListItem key={item.id} id={item.id} name={item.name} note={item.note} price={item.price} updateItem={updateItem} />
                 ))}
             { !isAdding ? <AddItemButton onPress={triggerAdd} /> : <NewItemInput submitAction={addItem} /> }
@@ -68,12 +73,14 @@ export default function WishList() {
     }
 
     // addItem is to be used
-    function addItem (newItemTitle: string) {
+    async function addItem (newItemTitle: string) {
         if(newItemTitle && newItemTitle.trim()) {
-            const newId = uuidv4()
             try {
-                setWishListItems((prev) => [...prev, {id: newId, name: newItemTitle, note: "", price: NaN, updateItem: updateItem}])
-                saveWishlist()
+                // temp id is used to allow the item to be added to the list before the server responds
+                setWishListItems((prev) => [...prev, {id: "temp", name: newItemTitle, updateItem: updateItem}])
+                await saveWishlist()
+                // will trigger useEffect to fetch the updated list (with the ID for the new item)
+                refreshRequired.current = true
             } catch (error) {
                 console.log("Error adding item:", error);
             }
