@@ -1,5 +1,5 @@
 import WishList from "@/components/wishList";
 
-export default async function MyList() {
+export default function MyList() {
     return <WishList/>
 }

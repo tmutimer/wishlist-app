@@ -32,6 +32,7 @@ export async function GET(req: Request, { params }) {
       return {
         id: item._id,
         name: item.name,
+        note: item.note,
         price: item.price,
         reserved: item.reserved,
         reservedBy: item.reservedBy
