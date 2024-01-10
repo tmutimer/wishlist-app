@@ -1,4 +1,4 @@
-// this file currently exists only to provide the type used by the higher-level API route
+// this route currently exists only to provide the type used by the higher-level API route
 export interface ListItemAPIResponse {
   id: string;
   name: string;

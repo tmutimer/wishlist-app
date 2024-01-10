@@ -10,6 +10,10 @@ export const authOptions = {
     ],
     callbacks: {
         async session({session, token}: {session: any, token: any}) {
+            console.log("Running the session callback");
+            console.log("Token.sub:", token.sub);
+            
+            
             session.user.id = token.sub as string;
             return session;
         }

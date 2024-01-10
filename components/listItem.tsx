@@ -44,7 +44,7 @@ export default function ListItem({id, name, note, price, updateItem = () => {con
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-            updateItem({id, name, note, price})
+            updateItem(id, {id, name, note, price})
                 
             event.currentTarget.blur()
             // setLocalName(name)

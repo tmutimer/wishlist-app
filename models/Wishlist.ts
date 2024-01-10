@@ -2,7 +2,6 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 import { IUser } from './User';
 
 export interface IListItem extends Document {
-    itemID: string;
     name: string;
     note?: string;
     price?: number;
@@ -11,21 +10,20 @@ export interface IListItem extends Document {
 }
 
 export interface IWishlist extends Document {
-    wishlistID: string;
-    userID: IUser['googleId'];
-    listItems: IListItem[];
+  userID: string;
+  listItems: IListItem[];
 }
 
 const ListItemSchema: Schema = new Schema({
-    itemID: { type: String, required: true },
     name: { type: String, required: true },
     note: { type: String, required: false },
     price: { type: Number, required: false },
+    reserved: { type: Boolean, required: true },
+    reservedBy: { type: String, required: false }
 });
 
 const WishlistSchema: Schema = new Schema({
-    wishlistID: { type: String, required: true, unique: true },
-    userID: { type: Schema.Types.ObjectId, ref: 'User' },
+    userID: {type: String},
     listItems: [ListItemSchema]
 });
 
