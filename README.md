@@ -1,6 +1,6 @@
 ## Summary
 A simple wishlist app which allows you to save wishlist items. You can give each item a description and a price.
-Items are persisted against a user ID in a MongoDB database.
+Items are persisted against a user ID in a MongoDB database, and you can authenticate using Google Sign-in.
 
 ## Development
 1. Install the required packages using your favoured package manager, like `npm` or `yarn`.
