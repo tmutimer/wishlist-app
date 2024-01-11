@@ -7,9 +7,17 @@ import NewItemInput from "./newItemInput";
 import { useSession } from "next-auth/react";
 import { ListItemAPIResponse } from "@/app/api/wishlists/[userID]/items/route";
 import { redirect } from "next/navigation";
+import { Session } from "next-auth";
+
+interface WishListUser extends Session {
+    user: {
+        id: string
+        name: string
+    }
+}
 
 export default function WishList() {
-    const { data: session } = useSession()
+    const { data: session } = useSession() as { data: WishListUser | null };
     const [wishListItems, setWishListItems] = useState<ListItemProps[]>([]);
     const [isAdding, setIsAdding] = useState(false)
     const triggerAdd = () => setIsAdding(true)
@@ -50,7 +58,11 @@ export default function WishList() {
         }
     }, [session?.user?.id, refreshRequired]); // Dependency array
 
-    async function saveWishlist(updatedWishListItems: ListItemProps[]) { 
+    async function saveWishlist(updatedWishListItems: ListItemProps[]) {
+        if(!session?.user?.id) {
+            console.log("No session found, redirecting to login");
+            redirect("/api/auth/signin")
+        }
         let response = await fetch(`/api/wishlists/${session.user.id}/`, {
             method: 'PATCH',
             body: JSON.stringify({
