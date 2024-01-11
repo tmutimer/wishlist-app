@@ -1,6 +1,7 @@
 import { connectToDb } from "@/db";
 import Wishlist, { IListItem, IWishlist } from "@/models/Wishlist";
 import { ListItemAPIResponse as ListItemAPISchema } from "./items/route";
+import { log } from "console";
 
 // Contract for the response object
 export interface WishlistAPIResponse {
@@ -10,7 +11,7 @@ export interface WishlistAPIResponse {
 }
 
 
-export async function GET(req: Request, { params }) {
+export async function GET(req: Request, { params }: {params: {userID: string}}) {
   console.log("/api/wishlists/userID/route.ts: GET)");
   await connectToDb();
 
@@ -28,9 +29,12 @@ export async function GET(req: Request, { params }) {
   }
 
   function getListItemsforAPIResponse(doc: IWishlist): ListItemAPISchema[] {
+    console.log("IDs from GET API:");
+    
+    log(doc.listItems.map((item) => item._id.toString()))
     return doc.listItems.map((item) => {
       return {
-        id: item._id,
+        id: item._id.toString(),
         name: item.name,
         note: item.note,
         price: item.price,
@@ -52,7 +56,7 @@ export async function GET(req: Request, { params }) {
 }
 
 // This is a PATCH instead of a PUT because listItems array counts as one property
-export async function PATCH(req: Request, { params }) {
+export async function PATCH(req: Request, { params }: {params: {userID: string}}) {
   console.log("api/wishlists/userID/route.ts: PUT")
   await connectToDb()
   console.log("params: ", params)
@@ -73,11 +77,20 @@ export async function PATCH(req: Request, { params }) {
     list = newList
   }
 
+  console.log("Existing IDs:");
+  console.log("list: ", list.listItems.map(item => item._id));
+
+  console.log("Updated IDs:");
+  console.log("list: ", updatedListItems.map(item => item.id));
+  
+
   // for each existing item, search for an updated one in our request and update it
   for (let i = 0; i < list.listItems.length; i++) {
     const existingListItem = list.listItems[i];
-    const updatedItem = updatedListItems.find((item) => item.id === existingListItem._id)
+    const updatedItem = updatedListItems.find((item) => item.id === existingListItem._id.toString());
+
     if(updatedItem) {
+      console.log("found updated item: ", updatedItem);
       existingListItem.name = updatedItem.name
       existingListItem.note = updatedItem.note
       existingListItem.price = updatedItem.price
@@ -91,8 +104,14 @@ export async function PATCH(req: Request, { params }) {
 
   // add any new items
   updatedListItems.forEach((item) => {
-    const foundItem = list.listItems.find(existingItem => existingItem._id === item.id)
+    const foundItem = list.listItems.find(existingItem => {
+      // must use toString because Mongoose IDs are objects
+      // console.log("Comparing existing item: ", existingItem._id.toString(), " to new item: ", item.id)
+      
+      return existingItem._id.toString() === item.id
+    })
     if (!foundItem) {
+      console.log("did not find item with ID: ", item.id)
       // MongooseArray push casts to ListItem subdocument automatically
       list.listItems.push({
         name: item.name,
