@@ -2,12 +2,12 @@
 
 import ListItem, {ListItemProps} from "@/components/listItem"
 import AddItemButton from "@/components/addItemButton";
-import { useCallback, useEffect, useRef, useState } from "react";
 import NewItemInput from "./newItemInput";
-import { useSession } from "next-auth/react";
 import { ListItemAPIResponse } from "@/app/api/wishlists/[userID]/items/route";
 import { redirect } from "next/navigation";
 import { Session } from "next-auth";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 interface WishListUser extends Session {
     user: {
@@ -49,12 +49,11 @@ export default function WishList() {
             }
         };
     
-        // Check if session is available and then call the function
         if (session?.user?.id) {
             fetchWishlist();
             setRefreshRequired(false)
         }
-    }, [session?.user?.id, refreshRequired]); // Dependency array
+    }, [session?.user?.id, refreshRequired]);
 
     async function saveWishlist(updatedWishListItems: ListItemProps[]) {
         if(!session?.user?.id) {
@@ -107,7 +106,7 @@ export default function WishList() {
         
         if(newItemTitle && newItemTitle.trim()) {
             try {
-                // temp id is used to allow the item to be added to the list before the server responds
+                // temp ID is quickly replaced by the real ID from the server
                 const updatedWishListItems = [...wishListItems, {id: "temp", name: newItemTitle, updateItem: updateItem}]
                 setWishlistItems(updatedWishListItems)
                 saveWishlist(updatedWishListItems)
