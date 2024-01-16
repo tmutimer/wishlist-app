@@ -18,9 +18,9 @@ interface WishListUser extends Session {
 
 export default function WishList() {
     const { data: session } = useSession() as { data: WishListUser | null };
-    const [wishListItems, setWishListItems] = useState<ListItemProps[]>([]);
+    const [wishListItems, setWishlistItems] = useState<ListItemProps[]>([]);
     const [isAdding, setIsAdding] = useState(false)
-    const triggerAdd = () => setIsAdding(true)
+    const startAddingListItem = () => setIsAdding(true)
     const [refreshRequired, setRefreshRequired] = useState(true)
 
     
@@ -30,10 +30,8 @@ export default function WishList() {
     }
 
     useEffect(() => {
-        console.log("Wishlist useEffect called");
         
         const fetchWishlist = async () => {
-            console.log("Fetching wishlist data");
     
             try {
                 const response = await fetch(`/api/wishlists/${session.user.id}/`);
@@ -45,7 +43,7 @@ export default function WishList() {
                     price: item.price,
                 }));
     
-                setWishListItems(listItems);
+                setWishlistItems(listItems);
             } catch (error) {
                 console.log("Fetching error:", error);
             }
@@ -91,7 +89,7 @@ export default function WishList() {
             {wishListItems && wishListItems.map((item) => (            
                 <ListItem key={item.id} id={item.id} name={item.name} note={item.note} price={item.price} updateItem={updateItem} />
                 ))}
-            { !isAdding ? <AddItemButton onPress={triggerAdd} /> : <NewItemInput submitAction={addItem} /> }
+            { !isAdding ? <AddItemButton onPress={startAddingListItem} /> : <NewItemInput submitAction={addListItem} /> }
         </main>
     )
 
@@ -99,19 +97,19 @@ export default function WishList() {
         console.log("Updating item:", id, updatedItem);
         const updatedWishListItems = wishListItems.map(item => item.id !== id ? item : {...updatedItem})
 
-        setWishListItems(updatedWishListItems);
+        setWishlistItems(updatedWishListItems);
         saveWishlist(updatedWishListItems)
         setRefreshRequired(true)
     }
 
-    async function addItem (newItemTitle: string) {
+    async function addListItem (newItemTitle: string) {
         console.log("Adding item:", newItemTitle);
         
         if(newItemTitle && newItemTitle.trim()) {
             try {
                 // temp id is used to allow the item to be added to the list before the server responds
                 const updatedWishListItems = [...wishListItems, {id: "temp", name: newItemTitle, updateItem: updateItem}]
-                setWishListItems(updatedWishListItems)
+                setWishlistItems(updatedWishListItems)
                 saveWishlist(updatedWishListItems)
                 setRefreshRequired(true)
             } catch (error) {
