@@ -11,8 +11,7 @@ export interface ListItemProps {
     updateItem: Function;
 };
 
-export default function ListItem({id, name, note, price, updateItem = () => {console.log("default updateItem used");
-} }: ListItemProps) {
+export default function ListItem({id, name, note, price, updateItem }: ListItemProps) {
 
     const [isEditable, setIsEditable] = useState(false);
     const [localName, setLocalName] = useState(name);
@@ -20,7 +19,8 @@ export default function ListItem({id, name, note, price, updateItem = () => {con
     const [localPrice, setLocalPrice] = useState(price);    
 
     const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node)) { //handle blur bubble from child
+        const isFocusLeavingListItem = !event.currentTarget.contains(event.relatedTarget as Node);
+        if (isFocusLeavingListItem) {
             setIsEditable(false);
         }
     };
@@ -54,14 +54,10 @@ export default function ListItem({id, name, note, price, updateItem = () => {con
             updateItem(id, updatedItem)
                 
             event.currentTarget.blur()
-            // setLocalName(name)
-            // setLocalNote(note)
         }
 
         if (event.key === 'Escape') {
             event.currentTarget.blur()
-            // setLocalName(name)
-            // setLocalNote(note)
         }
     };
 
